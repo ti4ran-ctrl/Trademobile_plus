@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>מחשבון מימון רכב מתקדם</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#14120f;--bg2:#2a251d;--card:#25211b;--card2:#352e24;--line:rgba(245,240,230,.1);--tx:#F5F0E6;--tx2:#b3a690;--gold:#d4a55f;--gold2:#9c7229;--ok:#34d399;--bad:#fb7185;--inp:#181510;--sh:0 1px 0 rgba(255,255,255,.12) inset,0 -3px 0 rgba(0,0,0,.35) inset,0 2px 2px rgba(0,0,0,.3),0 12px 24px -6px rgba(0,0,0,.5),0 32px 60px -20px rgba(0,0,0,.55)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg1:#ece5d6;--bg2:#faf6ee;--card:#fff;--card2:#f4eee1;--line:rgba(28,26,23,.12);--tx:#1C1A17;--tx2:#6e6250;--inp:#efe8d8;--sh:0 1px 0 #fff inset,0 -3px 0 rgba(28,26,23,.08) inset,0 2px 2px rgba(28,26,23,.08),0 12px 24px -6px rgba(28,26,23,.15),0 32px 60px -20px rgba(28,26,23,.2)}}
+:root[data-theme="light"]{--bg1:#ece5d6;--bg2:#faf6ee;--card:#fff;--card2:#f4eee1;--line:rgba(28,26,23,.12);--tx:#1C1A17;--tx2:#6e6250;--inp:#efe8d8}
+*{box-sizing:border-box;margin:0}
+html{height:100%}
+body{font-family:'Heebo',system-ui,sans-serif;color:var(--tx);background:radial-gradient(circle at 80% 0,var(--bg2),var(--bg1) 60%) fixed;min-height:100%;padding:calc(16px + env(safe-area-inset-top,0px)) 14px calc(24px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:1040px;margin:auto;perspective:1400px}
+.card{background:linear-gradient(160deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:var(--sh);transform-style:preserve-3d;transition:transform .25s ease;will-change:transform}
+h2{font-size:1rem;font-weight:800;color:var(--gold);margin-bottom:14px}
+.head{display:flex;justify-content:center;margin-bottom:8px}
+.head img{width:min(340px,86%);height:auto;border-radius:18px;display:block;box-shadow:0 8px 24px rgba(0,0,0,.4),0 0 0 1px rgba(212,165,95,.3)}
+.grid{display:grid;gap:18px;grid-template-columns:1fr}
+@media(min-width:900px){.grid{grid-template-columns:7fr 5fr}}
+.stack{display:grid;gap:18px;align-content:start}
+.row2{display:grid;gap:12px;grid-template-columns:1fr 1fr}
+@media(max-width:520px){.row2{grid-template-columns:1fr}}
+label{display:block;font-size:.75rem;font-weight:700;color:var(--tx2);margin:12px 0 6px}
+.f{display:flex;justify-content:space-between;align-items:center}
+input,select{width:100%;font:inherit;font-weight:700;color:var(--tx);background:var(--inp);border:1px solid var(--line);border-radius:14px;padding:11px 14px;box-shadow:0 3px 6px rgba(0,0,0,.28) inset,0 1px 0 rgba(255,255,255,.06);transition:.2s}
+input:focus,select:focus{outline:none;border-color:var(--gold);box-shadow:0 3px 6px rgba(0,0,0,.2) inset,0 0 0 3px rgba(212,165,95,.28)}
+input.bad{border-color:var(--bad)}
+input:disabled{opacity:.6;cursor:not-allowed}input:disabled::placeholder{color:var(--bad);opacity:1;font-weight:800}
+.num{direction:rtl;text-align:right;font-size:1.1rem}
+.cur{position:relative}
+.ov{position:absolute;inset:0;display:flex;align-items:center;padding-inline:16px;pointer-events:none;direction:rtl}
+.mir{font-size:1.1rem;font-weight:700;visibility:hidden;white-space:pre}
+.ov b{color:var(--gold);margin-inline-start:6px}
+.nt{background:rgba(212,165,95,.12);color:var(--gold);border:1px solid rgba(212,165,95,.35)}
+input[type=range]{padding:0;height:8px;border-radius:6px;background:var(--inp);-webkit-appearance:none;appearance:none;margin-top:10px;box-shadow:0 2px 4px rgba(0,0,0,.35) inset}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f6d19c,var(--gold2));box-shadow:0 3px 0 #5e4318,0 6px 10px rgba(0,0,0,.4)}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radius:50%;background:var(--gold2);box-shadow:0 3px 0 #5e4318}
+.info{display:flex;justify-content:space-between;gap:8px;padding:11px 14px;border-radius:14px;background:rgba(212,165,95,.1);border:1px solid rgba(212,165,95,.25);margin-top:12px;font-size:.8rem}
+.info b{color:var(--gold)}
+.lim{font-size:.78rem;color:var(--tx2);line-height:1.6;margin-top:10px}
+#status{padding:14px;border-radius:16px;font-weight:700;font-size:.88rem;text-align:center;box-shadow:var(--sh)}
+.ok{background:rgba(52,211,153,.15);color:var(--ok);border:1px solid rgba(52,211,153,.35)}
+.no{background:rgba(251,113,133,.15);color:var(--bad);border:1px solid rgba(251,113,133,.35)}
+.big{text-align:center;padding:20px 10px;border-radius:20px;background:linear-gradient(160deg,rgba(212,165,95,.22),rgba(156,114,41,.06));border:1px solid rgba(212,165,95,.35);box-shadow:0 2px 8px rgba(0,0,0,.3) inset;margin-bottom:14px}
+.big small{display:block;font-size:.72rem;font-weight:700;color:var(--tx2);letter-spacing:.06em}
+#pay{font-size:2.6rem;font-weight:900;color:var(--gold);direction:ltr;display:block;text-shadow:0 1px 0 #9c7229,0 2px 0 #7a5a20,0 3px 0 #5e4318,0 8px 14px rgba(0,0,0,.45)}
+.kv{display:flex;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:.82rem;color:var(--tx2)}
+.kv b{color:var(--tx);direction:ltr}.kv:last-child{border:0}
+.kv.fee{align-items:center;font-size:.86rem;padding:14px 12px;border-radius:16px;background:rgba(212,165,95,.13);border:1px solid rgba(212,165,95,.4);box-shadow:0 2px 6px rgba(0,0,0,.18) inset}
+.kv.fee span{color:var(--tx);font-weight:800}
+.kv.fee b{font-size:1.25rem;font-weight:900;color:var(--gold);white-space:nowrap;flex:none}
+.card,label,h2,.lim{text-align:center}
+.num,select{text-align:center;text-align-last:center}
+.cur input{padding:11px 16px}
+.ov{justify-content:center}
+.f,.info,.kv,.btns{justify-content:center;gap:12px}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+button{font:inherit;font-weight:800;cursor:pointer;border:0;border-radius:14px;padding:12px 18px;color:#1C1A17;background:linear-gradient(180deg,#f6d19c,var(--gold) 45%,var(--gold2));box-shadow:0 5px 0 #5e4318,0 10px 18px rgba(0,0,0,.35),0 1px 0 rgba(255,255,255,.6) inset;transition:transform .1s,box-shadow .1s}
+button:active{transform:translateY(4px);box-shadow:0 1px 0 #5e4318,0 3px 6px rgba(0,0,0,.35)}
+button.sec{color:var(--tx);background:linear-gradient(180deg,var(--card2),var(--card));box-shadow:0 5px 0 rgba(0,0,0,.4),0 10px 18px rgba(0,0,0,.25),0 1px 0 rgba(255,255,255,.12) inset}
+.tw{overflow-x:auto;max-height:440px;overflow-y:auto;border-radius:14px;border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;font-size:.8rem;direction:rtl;min-width:520px}
+th{position:sticky;top:0;background:var(--card2);color:var(--gold);font-weight:800;padding:10px;text-align:center}
+td{padding:8px 10px;text-align:center;border-top:1px solid var(--line);direction:ltr}
+tbody tr:nth-child(even){background:rgba(127,127,127,.06)}
+tr.last td{font-weight:800;color:var(--gold)}
+.notes{font-size:.75rem;color:var(--tx2);line-height:1.8;padding:0;list-style-position:inside}
+#pdfHead{display:none}
+@media print{
+ :root{--bg1:#fff;--bg2:#fff;--card:#fff;--card2:#fff;--tx:#111;--tx2:#444;--inp:#f3f3f3;--gold:#7a5518;--line:#ccc;--sh:none}
+ body{background:#fff!important;padding:0}.card{box-shadow:none;transform:none!important;break-inside:avoid;border:1px solid #ccc}
+ .btns,input[type=range],#limCard,#status{display:none!important}
+ .grid{grid-template-columns:1fr 1fr}.tw{max-height:none;overflow:visible}th{position:static}
+ #pay{text-shadow:none}#pdfHead{display:block;font-size:.8rem;color:#444;margin-bottom:8px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <div class="head"><img id="logo" alt="טרייד מוביל +" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjg5LjQgMzQwLjAiIHdpZHRoPSIxMjg5IiBoZWlnaHQ9IjM0MCIgeG1sbnM6YzJwYT0iaHR0cDovL2MycGEub3JnL21hbmlmZXN0Ij4KPHRpdGxlPteY16jXmdeZ15Mg157XldeR15nXnCArPC90aXRsZT4KPGRlZnM+PGxpbmVhckdyYWRpZW50IGlkPSJjcEdvbGQiIHgxPSIxMy44OSIgeTE9IjMwMi40MiIgeDI9IjMwMi40MiIgeTI9IjEzLjkiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjOWM3MjI5Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iLjMxIiBzdG9wLWNvbG9yPSIjYzg5NjQ0Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iLjY0IiBzdG9wLWNvbG9yPSIjZDRhNTVmIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI2Y2ZDE5YyIvPgogICAgPC9saW5lYXJHcmFkaWVudD48L2RlZnM+CjxyZWN0IHdpZHRoPSIxMjg5LjQiIGhlaWdodD0iMzQwLjAiIGZpbGw9IiMxQzFBMTciLz4KPHBhdGggZmlsbD0iI0Y1RjBFNiIgZD0iTTMxMi41NiAyNDQuMTdRMzEwLjc2IDI0NC41Mjk5OTk5OTk5OTk5NyAzMDkuMjMgMjQyLjcyOTk5OTk5OTk5OTk2UTMwNy43IDI0MC45Mjk5OTk5OTk5OTk5OCAzMDcuNyAyMzguOTVWMjE3LjcwOTk5OTk5OTk5OTk4UTMwNy43IDIxNS45MDk5OTk5OTk5OTk5NyAzMDkuMTQgMjE0LjEwOTk5OTk5OTk5OTk2UTMxMC41OCAyMTIuMzA5OTk5OTk5OTk5OTcgMzEyLjM4IDIxMS41ODk5OTk5OTk5OTk5N0wzMTcuNzggMjA5LjQyOTk5OTk5OTk5OTk4UTMyMS45MiAyMDcuNjMgMzI1LjQzIDIwNC43NVEzMjguOTQgMjAxLjg2OTk5OTk5OTk5OTk4IDMzMS4xIDE5Ny4wOTk5OTk5OTk5OTk5N1EzMzMuMjYgMTkyLjMyOTk5OTk5OTk5OTk4IDMzMy4yNiAxODQuOTVRMzMzLjI2IDE3OC44Mjk5OTk5OTk5OTk5OCAzMzEuOTA5OTk5OTk5OTk5OTcgMTc1LjA0OTk5OTk5OTk5OTk4UTMzMC41NiAxNzEuMjY5OTk5OTk5OTk5OTggMzI3LjIzIDE2OS41NTk5OTk5OTk5OTk5N1EzMjMuOSAxNjcuODQ5OTk5OTk5OTk5OTcgMzE3Ljk2IDE2Ny44NDk5OTk5OTk5OTk5N0gyODcuMzZRMjg1LjM4IDE2Ny44NDk5OTk5OTk5OTk5NyAyODQuMDMgMTY2LjQ5OTk5OTk5OTk5OTk3UTI4Mi42OCAxNjUuMTQ5OTk5OTk5OTk5OTggMjgyLjY4IDE2My4xNjk5OTk5OTk5OTk5NlYxMTguNTI5OTk5OTk5OTk5OTlRMjgyLjY4IDExNi41NDk5OTk5OTk5OTk5OCAyODQuMDMgMTE1LjE5OTk5OTk5OTk5OTk5UTI4NS4zOCAxMTMuODQ5OTk5OTk5OTk5OTggMjg3LjM2IDExMy44NDk5OTk5OTk5OTk5OEgzMTAuNFEzMTIuMzggMTEzLjg0OTk5OTk5OTk5OTk4IDMxMy43MyAxMTUuMTk5OTk5OTk5OTk5OTlRMzE1LjA4IDExNi41NDk5OTk5OTk5OTk5OCAzMTUuMDggMTE4LjUyOTk5OTk5OTk5OTk5VjEzOC44Njk5OTk5OTk5OTk5OEgzMjUuMzRRMzQxLjM2IDEzOC44Njk5OTk5OTk5OTk5OCAzNTAuOSAxNDQuMjY5OTk5OTk5OTk5OThRMzYwLjQ0IDE0OS42NyAzNjQuNzYgMTU5LjY1OTk5OTk5OTk5OTk3UTM2OS4wOCAxNjkuNjQ5OTk5OTk5OTk5OTggMzY5LjA4IDE4My42ODk5OTk5OTk5OTk5N1EzNjkuMDggMTk1LjU3IDM2NS4wMyAyMDUuMzhRMzYwLjk4IDIxNS4xODk5OTk5OTk5OTk5NyAzNTMuOTYwMDAwMDAwMDAwMDQgMjIyLjQ3OTk5OTk5OTk5OTk2UTM0Ni45NCAyMjkuNzY5OTk5OTk5OTk5OTggMzM4LjIxMDAwMDAwMDAwMDA0IDIzNC43MTk5OTk5OTk5OTk5N1EzMjkuNDggMjM5LjY3IDMxOS45NCAyNDIuMTg5OTk5OTk5OTk5OTdaTTM4OS4wNiAxOTguODA5OTk5OTk5OTk5OTdRMzg3LjA4IDE5OC44MDk5OTk5OTk5OTk5NyAzODUuNzMgMTk3LjQ1OTk5OTk5OTk5OTk4UTM4NC4zOCAxOTYuMTA5OTk5OTk5OTk5OTkgMzg0LjM4IDE5NC4xM1YxNDMuNTQ5OTk5OTk5OTk5OThRMzg0LjM4IDE0MS41NyAzODUuNzMgMTQwLjIxOTk5OTk5OTk5OTk3UTM4Ny4wOCAxMzguODY5OTk5OTk5OTk5OTggMzg5LjA2IDEzOC44Njk5OTk5OTk5OTk5OEg0MTUuODhRNDE3LjY4IDEzOC44Njk5OTk5OTk5OTk5OCA0MTkuMTIgMTQwLjIxOTk5OTk5OTk5OTk3UTQyMC41NiAxNDEuNTcgNDIwLjU2IDE0My41NDk5OTk5OTk5OTk5OFYxOTQuMTNRNDIwLjU2IDE5Ni4xMDk5OTk5OTk5OTk5OSA0MTkuMTIgMTk3LjQ1OTk5OTk5OTk5OTk4UTQxNy42OCAxOTguODA5OTk5OTk5OTk5OTcgNDE1Ljg4IDE5OC44MDk5OTk5OTk5OTk5N1pNNDQwLjcyIDI0MS42NDk5OTk5OTk5OTk5OFE0MzguNzQgMjQxLjY0OTk5OTk5OTk5OTk4IDQzNy4zOSAyNDAuMjk5OTk5OTk5OTk5OThRNDM2LjA0IDIzOC45NSA0MzYuMDQgMjM2Ljk2OTk5OTk5OTk5OTk3VjIxOC43ODk5OTk5OTk5OTk5NlE0MzYuMDQgMjE2LjgwOTk5OTk5OTk5OTk3IDQzNy4zOSAyMTUuNDU5OTk5OTk5OTk5OThRNDM4Ljc0IDIxNC4xMDk5OTk5OTk5OTk5OSA0NDAuNzIgMjE0LjEwOTk5OTk5OTk5OTk5SDQ4My43NFYxODQuMDQ5OTk5OTk5OTk5OThRNDgzLjc0IDE3NS40MDk5OTk5OTk5OTk5NyA0NzkuNTEgMTcwLjk5OTk5OTk5OTk5OTk3UTQ3NS4yOCAxNjYuNTg5OTk5OTk5OTk5OTcgNDY2LjQ2IDE2Ni41ODk5OTk5OTk5OTk5N0g0NDIuNTJRNDQwLjU0IDE2Ni41ODk5OTk5OTk5OTk5NyA0MzkuMTkgMTY1LjIzOTk5OTk5OTk5OTk4UTQzNy44NCAxNjMuODkgNDM3Ljg0IDE2MS45MDk5OTk5OTk5OTk5N1YxNDMuNTQ5OTk5OTk5OTk5OThRNDM3Ljg0IDE0MS41NyA0MzkuMTkgMTQwLjIxOTk5OTk5OTk5OTk3UTQ0MC41NCAxMzguODY5OTk5OTk5OTk5OTggNDQyLjUyIDEzOC44Njk5OTk5OTk5OTk5OEg0NjcuMzZRNDgzLjkyIDEzOC44Njk5OTk5OTk5OTk5OCA0OTUuNjIgMTQzLjE5UTUwNy4zMiAxNDcuNTEgNTEzLjYyIDE1Ny40MDk5OTk5OTk5OTk5N1E1MTkuOTIgMTY3LjMwOTk5OTk5OTk5OTk3IDUxOS45MiAxODQuMDQ5OTk5OTk5OTk5OThWMjE0LjEwOTk5OTk5OTk5OTk5SDUyNi4wNFE1MjguMDIgMjE0LjEwOTk5OTk5OTk5OTk5IDUyOS4zNyAyMTUuNDU5OTk5OTk5OTk5OThRNTMwLjcyIDIxNi44MDk5OTk5OTk5OTk5NyA1MzAuNzIgMjE4Ljc4OTk5OTk5OTk5OTk2VjIzNi45Njk5OTk5OTk5OTk5N1E1MzAuNzIgMjM4Ljk1IDUyOS4zNyAyNDAuMjk5OTk5OTk5OTk5OThRNTI4LjAyIDI0MS42NDk5OTk5OTk5OTk5OCA1MjYuMDQgMjQxLjY0OTk5OTk5OTk5OTk4Wk01NDkuNDM5OTk5OTk5OTk5OSAyNDEuNjQ5OTk5OTk5OTk5OThRNTQ3LjQ1OTk5OTk5OTk5OTkgMjQxLjY0OTk5OTk5OTk5OTk4IDU0Ni4xMDk5OTk5OTk5OTk5IDI0MC4yOTk5OTk5OTk5OTk5OFE1NDQuNzYgMjM4Ljk1IDU0NC43NiAyMzYuOTY5OTk5OTk5OTk5OTdWMTQzLjU0OTk5OTk5OTk5OTk4UTU0NC43NiAxNDEuNTcgNTQ2LjEwOTk5OTk5OTk5OTkgMTQwLjIxOTk5OTk5OTk5OTk3UTU0Ny40NTk5OTk5OTk5OTk5IDEzOC44Njk5OTk5OTk5OTk5OCA1NDkuNDM5OTk5OTk5OTk5OSAxMzguODY5OTk5OTk5OTk5OThINTc2LjI2UTU3OC4wNiAxMzguODY5OTk5OTk5OTk5OTggNTc5LjUgMTQwLjIxOTk5OTk5OTk5OTk3UTU4MC45Mzk5OTk5OTk5OTk5IDE0MS41NyA1ODAuOTM5OTk5OTk5OTk5OSAxNDMuNTQ5OTk5OTk5OTk5OThWMjM2Ljk2OTk5OTk5OTk5OTk3UTU4MC45Mzk5OTk5OTk5OTk5IDIzOC45NSA1NzkuNSAyNDAuMjk5OTk5OTk5OTk5OThRNTc4LjA2IDI0MS42NDk5OTk5OTk5OTk5OCA1NzYuMjYgMjQxLjY0OTk5OTk5OTk5OTk4Wk02NTkuMDYgMTY3LjY2OTk5OTk5OTk5OTk2SDY0Ni44MTk5OTk5OTk5OTk5TDYzMC44IDIzNi45Njk5OTk5OTk5OTk5N1E2MzAuOCAyMzguOTUgNjI5LjM1OTk5OTk5OTk5OTkgMjQwLjI5OTk5OTk5OTk5OTk4UTYyNy45MiAyNDEuNjQ5OTk5OTk5OTk5OTggNjI2LjEyIDI0MS42NDk5OTk5OTk5OTk5OEg2MDEuNjRRNTk5LjY2IDI0MS42NDk5OTk5OTk5OTk5OCA1OTguMTMgMjQwLjI5OTk5OTk5OTk5OTk4UTU5Ni42IDIzOC45NSA1OTcuMTQgMjM2Ljk2OTk5OTk5OTk5OTk3TDYxNS42OCAxNjcuODQ5OTk5OTk5OTk5OTdINjAzLjA3OTk5OTk5OTk5OTlRNjAxLjEgMTY3Ljg0OTk5OTk5OTk5OTk3IDU5OS42NiAxNjYuNDk5OTk5OTk5OTk5OTdRNTk4LjIxOTk5OTk5OTk5OTkgMTY1LjE0OTk5OTk5OTk5OTk4IDU5OC4yMTk5OTk5OTk5OTk5IDE2My4xNjk5OTk5OTk5OTk5NlYxNDMuNTQ5OTk5OTk5OTk5OThRNTk4LjIxOTk5OTk5OTk5OTkgMTQxLjU3IDU5OS42NiAxNDAuMjE5OTk5OTk5OTk5OTdRNjAxLjEgMTM4Ljg2OTk5OTk5OTk5OTk4IDYwMy4wNzk5OTk5OTk5OTk5IDEzOC44Njk5OTk5OTk5OTk5OEg2NjQuNDU5OTk5OTk5OTk5OVE2NzYuNjk5OTk5OTk5OTk5OSAxMzguODY5OTk5OTk5OTk5OTggNjg2LjUxIDE0My4yNzk5OTk5OTk5OTk5N1E2OTYuMzE5OTk5OTk5OTk5OSAxNDcuNjkgNzAxLjk5IDE1Ny40MVE3MDcuNjYgMTY3LjEzIDcwNy42NiAxODIuNzg5OTk5OTk5OTk5OTZWMjM2Ljk2OTk5OTk5OTk5OTk3UTcwNy42NiAyMzguOTUgNzA2LjMxIDI0MC4yOTk5OTk5OTk5OTk5OFE3MDQuOTU5OTk5OTk5OTk5OSAyNDEuNjQ5OTk5OTk5OTk5OTggNzAyLjk4IDI0MS42NDk5OTk5OTk5OTk5OEg2NTMuMTJRNjUxLjE0IDI0MS42NDk5OTk5OTk5OTk5OCA2NDkuNzkgMjQwLjI5OTk5OTk5OTk5OTk4UTY0OC40Mzk5OTk5OTk5OTk5IDIzOC45NSA2NDguNDM5OTk5OTk5OTk5OSAyMzYuOTY5OTk5OTk5OTk5OTdWMjE4Ljc4OTk5OTk5OTk5OTk2UTY0OC40Mzk5OTk5OTk5OTk5IDIxNi44MDk5OTk5OTk5OTk5NyA2NDkuNzkgMjE1LjQ1OTk5OTk5OTk5OTk4UTY1MS4xNCAyMTQuMTA5OTk5OTk5OTk5OTkgNjUzLjEyIDIxNC4xMDk5OTk5OTk5OTk5OUg2NzIuOTJWMTg0LjQwOTk5OTk5OTk5OTk3UTY3Mi45MiAxNzguODI5OTk5OTk5OTk5OTggNjcxLjExOTk5OTk5OTk5OTkgMTc1LjE0UTY2OS4zMTk5OTk5OTk5OTk5IDE3MS40NSA2NjYuMjYgMTY5LjU1OTk5OTk5OTk5OTk3UTY2My4xOTk5OTk5OTk5OTk5IDE2Ny42Njk5OTk5OTk5OTk5NiA2NTkuMDYgMTY3LjY2OTk5OTk5OTk5OTk2Wk04MDAuOSAyNDEuNjQ5OTk5OTk5OTk5OThRNzk2LjkzOTk5OTk5OTk5OTkgMjQxLjY0OTk5OTk5OTk5OTk4IDc5Ni45Mzk5OTk5OTk5OTk5IDIzNy42ODk5OTk5OTk5OTk5N1YxODYuMzlRNzk2LjkzOTk5OTk5OTk5OTkgMTc0LjUxIDc5OS40NTk5OTk5OTk5OTk5IDE2OC4yMDk5OTk5OTk5OTk5OFE3OTkuODE5OTk5OTk5OTk5OSAxNjcuMzA5OTk5OTk5OTk5OTcgODAwLjM1OTk5OTk5OTk5OTkgMTY2LjQwOTk5OTk5OTk5OTk3SDc2MS42NlE3NTkuNjggMTY2LjQwOTk5OTk5OTk5OTk3IDc1OC4zMjk5OTk5OTk5OTk5IDE2NS4wNTk5OTk5OTk5OTk5N1E3NTYuOTc5OTk5OTk5OTk5OSAxNjMuNzA5OTk5OTk5OTk5OTggNzU2Ljk3OTk5OTk5OTk5OTkgMTYxLjcyOTk5OTk5OTk5OTk2VjE0My41NDk5OTk5OTk5OTk5OFE3NTYuOTc5OTk5OTk5OTk5OSAxNDEuNTcgNzU4LjMyOTk5OTk5OTk5OTkgMTQwLjIxOTk5OTk5OTk5OTk3UTc1OS42OCAxMzguODY5OTk5OTk5OTk5OTggNzYxLjY2IDEzOC44Njk5OTk5OTk5OTk5OEg4NDMuMDJRODQ1LjAgMTM4Ljg2OTk5OTk5OTk5OTk4IDg0Ni4zNDk5OTk5OTk5OTk5IDE0MC4yMTk5OTk5OTk5OTk5N1E4NDcuNjk5OTk5OTk5OTk5OSAxNDEuNTcgODQ3LjY5OTk5OTk5OTk5OTkgMTQzLjU0OTk5OTk5OTk5OTk4VjE2MS43Mjk5OTk5OTk5OTk5NlE4NDcuNjk5OTk5OTk5OTk5OSAxNjMuNTI5OTk5OTk5OTk5OTcgODQ2LjUzIDE2NC45Njk5OTk5OTk5OTk5N1E4NDUuMzU5OTk5OTk5OTk5OSAxNjYuNDA5OTk5OTk5OTk5OTcgODQzLjAyIDE2Ni40MDk5OTk5OTk5OTk5N0g4MzUuNjRRODM0Ljc0IDE2Ny44NDk5OTk5OTk5OTk5NyA4MzQuMTk5OTk5OTk5OTk5OSAxNjkuNjQ5OTk5OTk5OTk5OThRODMxLjMxOTk5OTk5OTk5OTkgMTc3LjM5IDgzMS4zMTk5OTk5OTk5OTk5IDE4OC41NDk5OTk5OTk5OTk5OFYyMzcuNjg5OTk5OTk5OTk5OTdRODMxLjMxOTk5OTk5OTk5OTkgMjM5LjQ4OTk5OTk5OTk5OTk4IDgyOS41MiAyNDAuNTdRODI3LjcxOTk5OTk5OTk5OTkgMjQxLjY0OTk5OTk5OTk5OTk4IDgyNS45MiAyNDEuNjQ5OTk5OTk5OTk5OThaTTg2Ni42IDE5OC44MDk5OTk5OTk5OTk5N1E4NjQuNjIgMTk4LjgwOTk5OTk5OTk5OTk3IDg2My4yNyAxOTcuNDU5OTk5OTk5OTk5OThRODYxLjkyIDE5Ni4xMDk5OTk5OTk5OTk5OSA4NjEuOTIgMTk0LjEzVjE0My41NDk5OTk5OTk5OTk5OFE4NjEuOTIgMTQxLjU3IDg2My4yNyAxNDAuMjE5OTk5OTk5OTk5OTdRODY0LjYyIDEzOC44Njk5OTk5OTk5OTk5OCA4NjYuNiAxMzguODY5OTk5OTk5OTk5OThIODkzLjQyUTg5NS4yMiAxMzguODY5OTk5OTk5OTk5OTggODk2LjY2MDAwMDAwMDAwMDEgMTQwLjIxOTk5OTk5OTk5OTk3UTg5OC4xIDE0MS41NyA4OTguMSAxNDMuNTQ5OTk5OTk5OTk5OThWMTk0LjEzUTg5OC4xIDE5Ni4xMDk5OTk5OTk5OTk5OSA4OTYuNjYwMDAwMDAwMDAwMSAxOTcuNDU5OTk5OTk5OTk5OThRODk1LjIyIDE5OC44MDk5OTk5OTk5OTk5NyA4OTMuNDIgMTk4LjgwOTk5OTk5OTk5OTk3Wk05MjAuOTYgMTk4LjgwOTk5OTk5OTk5OTk3UTkxOC45OCAxOTguODA5OTk5OTk5OTk5OTcgOTE3LjYzIDE5Ny40NTk5OTk5OTk5OTk5OFE5MTYuMjggMTk2LjEwOTk5OTk5OTk5OTk5IDkxNi4yOCAxOTQuMTNWMTQzLjU0OTk5OTk5OTk5OTk4UTkxNi4yOCAxNDEuNTcgOTE3LjYzIDE0MC4yMTk5OTk5OTk5OTk5N1E5MTguOTggMTM4Ljg2OTk5OTk5OTk5OTk4IDkyMC45NiAxMzguODY5OTk5OTk5OTk5OThIOTQ3Ljc4UTk0OS41OCAxMzguODY5OTk5OTk5OTk5OTggOTUxLjAyIDE0MC4yMTk5OTk5OTk5OTk5N1E5NTIuNDYgMTQxLjU3IDk1Mi40NiAxNDMuNTQ5OTk5OTk5OTk5OThWMTk0LjEzUTk1Mi40NiAxOTYuMTA5OTk5OTk5OTk5OTkgOTUxLjAyIDE5Ny40NTk5OTk5OTk5OTk5OFE5NDkuNTggMTk4LjgwOTk5OTk5OTk5OTk3IDk0Ny43OCAxOTguODA5OTk5OTk5OTk5OTdaTTEwMjMuMDIgMjQxLjY0OTk5OTk5OTk5OTk4UTEwMjEuMDQwMDAwMDAwMDAwMSAyNDEuNjQ5OTk5OTk5OTk5OTggMTAxOS42OSAyNDAuMzlRMTAxOC4zNCAyMzkuMTI5OTk5OTk5OTk5OTcgMTAxOC4zNCAyMzcuMTQ5OTk5OTk5OTk5OThWMTgzLjg2OTk5OTk5OTk5OTk4UTEwMTguMzQgMTc1LjIyOTk5OTk5OTk5OTk2IDEwMTQuMTEgMTcwLjgxOTk5OTk5OTk5OTk2UTEwMDkuODggMTY2LjQwOTk5OTk5OTk5OTk3IDEwMDEuMDYwMDAwMDAwMDAwMSAxNjYuNDA5OTk5OTk5OTk5OTdIOTcyLjYyUTk3MC42NCAxNjYuNDA5OTk5OTk5OTk5OTcgOTY5LjI5IDE2NS4wNTk5OTk5OTk5OTk5N1E5NjcuOTQgMTYzLjcwOTk5OTk5OTk5OTk4IDk2Ny45NCAxNjEuNzI5OTk5OTk5OTk5OTZWMTQzLjU0OTk5OTk5OTk5OTk4UTk2Ny45NCAxNDEuNTcgOTY5LjI5IDE0MC4yMTk5OTk5OTk5OTk5N1E5NzAuNjQgMTM4Ljg2OTk5OTk5OTk5OTk4IDk3Mi42MiAxMzguODY5OTk5OTk5OTk5OThIMTAwMi4xNFExMDE4LjcgMTM4Ljg2OTk5OTk5OTk5OTk4IDEwMzAuMDQgMTQzLjAxUTEwNDEuMzggMTQ3LjE0OTk5OTk5OTk5OTk4IDEwNDcuMjMgMTU2LjY4OTk5OTk5OTk5OTk3UTEwNTMuMDggMTY2LjIyOTk5OTk5OTk5OTk2IDEwNTMuMDggMTgyLjc4OTk5OTk5OTk5OTk2VjIzNi45Njk5OTk5OTk5OTk5N1ExMDUzLjA4IDIzOC45NSAxMDUxLjczIDI0MC4yOTk5OTk5OTk5OTk5OFExMDUwLjM4IDI0MS42NDk5OTk5OTk5OTk5OCAxMDQ4LjQgMjQxLjY0OTk5OTk5OTk5OTk4Wk0xMTIyLjAyIDI0My40NVExMDk1LjkyIDI0My40NSAxMDgzLjE0IDIzMS4yOTk5OTk5OTk5OTk5OFExMDcwLjM2MDAwMDAwMDAwMDEgMjE5LjE0OTk5OTk5OTk5OTk4IDEwNzAuMzYwMDAwMDAwMDAwMSAxOTguNDVWMTQzLjU0OTk5OTk5OTk5OTk4UTEwNzAuMzYwMDAwMDAwMDAwMSAxNDEuNTcgMTA3MS43MSAxNDAuMjE5OTk5OTk5OTk5OTdRMTA3My4wNiAxMzguODY5OTk5OTk5OTk5OTggMTA3NS4wNCAxMzguODY5OTk5OTk5OTk5OThIMTA5Ny4zNjAwMDAwMDAwMDAxUTEwOTkuMTYgMTM4Ljg2OTk5OTk5OTk5OTk4IDExMDAuNiAxNDAuMjE5OTk5OTk5OTk5OTdRMTEwMi4wNCAxNDEuNTcgMTEwMi4wNCAxNDMuNTQ5OTk5OTk5OTk5OThWMTk3LjU0OTk5OTk5OTk5OTk4UTExMDIuMDQgMjA2LjU0OTk5OTk5OTk5OTk4IDExMDcuNjIgMjEwLjUxUTExMTMuMiAyMTQuNDY5OTk5OTk5OTk5OTcgMTEyMS44NCAyMTQuNDY5OTk5OTk5OTk5OTdRMTEzMC4zIDIxNC40Njk5OTk5OTk5OTk5NyAxMTM0Ljk4IDIxMC40MTk5OTk5OTk5OTk5NlExMTM5LjY2IDIwNi4zNjk5OTk5OTk5OTk5OCAxMTM5LjY2IDE5Ny45MDk5OTk5OTk5OTk5N1YxODUuODQ5OTk5OTk5OTk5OTdRMTEzOS42NiAxNzcuMzkgMTEzNy4xNCAxNzIuMjZRMTEzNC42MjAwMDAwMDAwMDAxIDE2Ny4xMyAxMTI5LjU4IDE2Ny4xM1ExMTI3LjQyIDE2Ny4xMyAxMTI0LjkgMTY3Ljc2UTExMjIuMzggMTY4LjM5IDExMjAuNzYgMTY5LjEwOTk5OTk5OTk5OTk5UTExMTguNiAxNjkuODI5OTk5OTk5OTk5OTggMTExNi44ODk5OTk5OTk5OTk5IDE2OC43NDk5OTk5OTk5OTk5N1ExMTE1LjE4IDE2Ny42Njk5OTk5OTk5OTk5NiAxMTE1LjE4IDE2NS4xNDk5OTk5OTk5OTk5OFYxNDguMDQ5OTk5OTk5OTk5OThRMTExNS4xOCAxNDYuMjUgMTExNS45OSAxNDQuMjY5OTk5OTk5OTk5OThRMTExNi44IDE0Mi4yODk5OTk5OTk5OTk5NiAxMTE4Ljk2IDE0MS4yMDk5OTk5OTk5OTk5OFExMTIxLjEyMDAwMDAwMDAwMDEgMTM5Ljk1IDExMjQuOTkwMDAwMDAwMDAwMiAxMzkuMTRRMTEyOC44NjAwMDAwMDAwMDAxIDEzOC4zMjk5OTk5OTk5OTk5OCAxMTM1Ljg4IDEzOC4zMjk5OTk5OTk5OTk5OFExMTQ5LjkyIDEzOC4zMjk5OTk5OTk5OTk5OCAxMTU4LjAyIDE0My4wMVExMTY2LjEyMDAwMDAwMDAwMDEgMTQ3LjY5IDExNjkuNzIgMTU3LjIzUTExNzMuMzIgMTY2Ljc2OTk5OTk5OTk5OTk4IDExNzMuMzIgMTgwLjYzVjE4Ni4wMjk5OTk5OTk5OTk5N1ExMTczLjMyIDE4OS44MDk5OTk5OTk5OTk5NyAxMTczLjQwOTk5OTk5OTk5OTkgMTkzLjQwOTk5OTk5OTk5OTk3UTExNzMuNSAxOTcuMDEgMTE3My4zMiAxOTguODA5OTk5OTk5OTk5OTdRMTE3Mi42IDIxMi40ODk5OTk5OTk5OTk5OCAxMTY3LjExMDAwMDAwMDAwMDEgMjIyLjQ3OTk5OTk5OTk5OTk2UTExNjEuNjIwMDAwMDAwMDAwMSAyMzIuNDY5OTk5OTk5OTk5OTcgMTE1MC41NTAwMDAwMDAwMDAyIDIzNy45NTk5OTk5OTk5OTk5OFExMTM5LjQ4IDI0My40NSAxMTIyLjAyIDI0My40NVoiLz4KPGcgdHJhbnNmb3JtPSJyb3RhdGUoMTQgMTgwLjAwIDEzMC4wMCkgdHJhbnNsYXRlKDExMC4wMCA2MC4wMCkgc2NhbGUoMC40NDI1OTApIj48cGF0aCBmaWxsPSJ1cmwoI2NwR29sZCkiIGQ9Im0yMzYuNDMsMjgyLjg1aC0yOS4zNGMtNy4yNSwwLTEzLjE0LTUuODgtMTMuMTQtMTMuMTR2LTExLjMzYy0uMjUtMS41MS0uNDEtMy4wNC0uNDEtNC42MnYtNjcuNjFoLTY3LjYyYy0xLjA0LDAtMi4wNy0uMDctMy4wOC0uMThoLTExLjkxYy03LjI1LDAtMTMuMTQtNS44OC0xMy4xNC0xMy4xNHYtMjkuMzRjMC03LjI1LDUuODgtMTMuMTQsMTMuMTQtMTMuMTRoODIuNlY2Mi44YzAtMS41OC4xNi0zLjEyLjQxLTQuNjJ2LTEwLjExYzAtNy4yNSw1Ljg4LTEzLjE0LDEzLjE0LTEzLjE0aDI5LjM0YzcuMjUsMCwxMy4xNCw1Ljg4LDEzLjE0LDEzLjE0djgyLjI5aDY2Ljc1VjQ3LjQ0YzAtMjYuMi0yMS4yNC00Ny40NC00Ny40NC00Ny40NEg0Ny40NEMyMS4yNCwwLDAsMjEuMjQsMCw0Ny40NHYyMjEuNDRjMCwyNi4yLDIxLjI0LDQ3LjQ0LDQ3LjQ0LDQ3LjQ0aDIyMS40NGMyNi4yLDAsNDcuNDQtMjEuMjQsNDcuNDQtNDcuNDR2LTgyLjczaC02Ni43NXY4My41N2MwLDcuMjYtNS44OCwxMy4xNC0xMy4xNCwxMy4xNFoiLz48L2c+CjxtZXRhZGF0YT48YzJwYTptYW5pZmVzdD5BQUFXZ21wMWJXSUFBQUFlYW5WdFpHTXljR0VBRVFBUWdBQUFxZ0E0bTNFRFl6SndZUUFBQUJaY2FuVnRZZ0FBQUVkcWRXMWtZekp0WVFBUkFCQ0FBQUNxQURpYmNRTjFjbTQ2WXpKd1lUbzBZbVZpWXpkbVpTMWtNVFZqTFRRNU9ERXRZVFU0WVMweFpXWTNPRFF6WmpjMk9XSUFBQUFEbDJwMWJXSUFBQUFwYW5WdFpHTXlZWE1BRVFBUWdBQUFxZ0E0bTNFRFl6SndZUzVoYzNObGNuUnBiMjV6QUFBQUFMeHFkVzFpQUFBQVJHcDFiV1JqWW05eUFCRUFFSUFBQUtvQU9KdHhFMk15Y0dFdWFXNW5jbVZrYVdWdWRDNTJNd0FBQUFBWVl6SnphS0kyY1Y1ejJFUUkyZHM5Nko4b1l1QUFBQUJ3WTJKdmNxTnBaR002Wm05eWJXRjBiV2x0WVdkbEwzTjJaeXQ0Yld4cWFXNXpkR0Z1WTJWSlJIZ3NlRzF3T21scFpEcG1aR0V6TkdaalpTMW1PR1E1TFRRek1XUXRPV0pqTUMxaE56azJaR1JrWkRkallqaHNjbVZzWVhScGIyNXphR2x3YUhCaGNtVnVkRTltQUFBQjRtcDFiV0lBQUFCQmFuVnRaR05pYjNJQUVRQVFnQUFBcWdBNG0zRVRZekp3WVM1aFkzUnBiMjV6TG5ZeUFBQUFBQmhqTW5Ob1UwczcwcDdONXpEUy9VUm93M01BZkFBQUFabGpZbTl5b21kaFkzUnBiMjV6Z3FKbVlXTjBhVzl1YTJNeWNHRXViM0JsYm1Wa2FuQmhjbUZ0WlhSbGNuT2hhMmx1WjNKbFpHbGxiblJ6Z2FKamRYSnNlQzF6Wld4bUkycDFiV0ptUFdNeWNHRXVZWE56WlhKMGFXOXVjeTlqTW5CaExtbHVaM0psWkdsbGJuUXVkak5rYUdGemFGZ2dtV0t0ZVZQcmJVbitUV2Y2QlV5WnNXKzBYTXRWTUxEVEJTMFg3VVVRWUwya1ptRmpkR2x2Ym5nZFkyOXRMbUZ1ZEdoeWIzQnBZeTVqYkdGMVpHVXVjSEp2ZG1sa1pXUnFjR0Z5WVcxbGRHVnljNkY0SDJOdmJTNWhiblJvY205d2FXTXViM0pwWjJsdUxXTnZibVpwWkdWdVkyVm5kVzVyYm05M2JtdGtaWE5qY21sd2RHbHZibmhtUTJ4aGRXUmxJSEJ5YjNacFpHVmtJSFJvYVhNZ1ptbHNaU0JoZENCMGFHVWdjbVZ4ZFdWemRDQnZaaUJoSUhWelpYSWdZVzVrSUcxaGVTQm9ZWFpsSUdOeVpXRjBaV1FnYjNJZ2JXOWthV1pwWldRZ2RHaGxJR1pwYkdVZ1kyOXVkR1Z1ZEhNdWJYTnZablIzWVhKbFFXZGxiblNoWkc1aGJXVm1RMnhoZFdSbGNtRnNiRUZqZEdsdmJuTkpibU5zZFdSbFpQVUFBQURJYW5WdFlnQUFBRUJxZFcxa1kySnZjZ0FSQUJDQUFBQ3FBRGliY1JOak1uQmhMbWhoYzJndVpHRjBZUUFBQUFBWVl6SnphRHpCbGk1aDlOOENSQWRFbDcraUNVSUFBQUNBWTJKdmNxVmpZV3huWm5Ob1lUSTFObU53WVdSTUFBQUFBQUFBQUFBQUFBQUFaR2hoYzJoWUlGM01aWDNTYlQ4enp1Y3I0d2kzYUZac2k0Y0lJTGVtWnlQWFk3ZFNSNFM1Wkc1aGJXVnVhblZ0WW1ZZ2JXRnVhV1psYzNScVpYaGpiSFZ6YVc5dWM0R2laWE4wWVhKMEdTYm5abXhsYm1kMGFCa2VCQUFBQWo1cWRXMWlBQUFBSjJwMWJXUmpNbU5zQUJFQUVJQUFBS29BT0p0eEEyTXljR0V1WTJ4aGFXMHVkaklBQUFBQ0QyTmliM0tsWTJGc1oyWnphR0V5TlRacGMybG5ibUYwZFhKbGVFMXpaV3htSTJwMWJXSm1QUzlqTW5CaEwzVnlianBqTW5CaE9qUmlaV0pqTjJabExXUXhOV010TkRrNE1TMWhOVGhoTFRGbFpqYzRORE5tTnpZNVlpOWpNbkJoTG5OcFoyNWhkSFZ5WldwcGJuTjBZVzVqWlVsRWVDeDRiWEE2YVdsa09tRTBaV0k0TldJMExXUmtNbUl0TkdRell5MWlPR1EzTFRoalltUTFabVkzWWpNNVpuSmpjbVZoZEdWa1gyRnpjMlZ5ZEdsdmJuT0RvbU4xY214NExYTmxiR1lqYW5WdFltWTlZekp3WVM1aGMzTmxjblJwYjI1ekwyTXljR0V1YVc1bmNtVmthV1Z1ZEM1Mk0yUm9ZWE5vV0NDWllxMTVVK3R0U2Y1Tlovb0ZUSm14YjdSY3kxVXdzTk1GTFJmdFJSQmd2YUpqZFhKc2VDcHpaV3htSTJwMWJXSm1QV015Y0dFdVlYTnpaWEowYVc5dWN5OWpNbkJoTG1GamRHbHZibk11ZGpKa2FHRnphRmdnSkNlbkN5NUtHdnpJbit5T0ZYNGsxdk1BcmxMbEpGTGJZQ3FzcGQ5OGo1bWlZM1Z5YkhncGMyVnNaaU5xZFcxaVpqMWpNbkJoTG1GemMyVnlkR2x2Ym5Ndll6SndZUzVvWVhOb0xtUmhkR0ZrYUdGemFGZ2c2aXJucW9USTRqbE53Ri9LMzZ1ZGJJY3hwTSt1MDltNllrajRTY0ZmYThOMFkyeGhhVzFmWjJWdVpYSmhkRzl5WDJsdVptK2paRzVoYldWdlFXNTBhSEp2Y0dsaklFWnBiR1Z6WjNabGNuTnBiMjVsTVM0d0xqQnJjM0JsWTFabGNuTnBiMjVsTWk0MExqQUFBQkE0YW5WdFlnQUFBQ2hxZFcxa1l6Smpjd0FSQUJDQUFBQ3FBRGliY1FOak1uQmhMbk5wWjI1aGRIVnlaUUFBQUJBSVkySnZjdEtFV1FJU29nRW1HQ0ZaQWdvd2dnSUdNSUlCamFBREFnRUNBaFJBNWFBSzdzSTUwTDY0Zy9vR1FnVTlaMVVUQURBS0JnZ3Foa2pPUFFRREF6QkpNUmN3RlFZRFZRUUtFdzVCYm5Sb2NtOXdhV01zSUZCQ1F6RXVNQ3dHQTFVRUF4TWxRVzUwYUhKdmNHbGpJRU52Ym5SbGJuUWdRM0psWkdWdWRHbGhiSE1nVW05dmRDQkRRVEFlRncweU5qQTRNRGN4T0RRek5UWmFGdzB5T0RBNE1EWXhPVFF6TlRaYU1FUXhGekFWQmdOVkJBb1REa0Z1ZEdoeWIzQnBZeXdnVUVKRE1Ta3dKd1lEVlFRREV5QkJiblJvY205d2FXTWdRMnhoZFdSbElFTnZiblJsYm5RZ1UybG5ibWx1WnpCWk1CTUdCeXFHU000OUFnRUdDQ3FHU000OUF3RUhBMElBQkpoNkNtdkxVQmdGRk5VMHZVS2xPVnRFNmRqZDE3TDVTdXdYMExlbUZpc0JNM2RrZC8zY3lqeEZBM1FvNVM0NmZYMC9paFkwVlo3bWZiOUtGNzAzdDVPaldEQldNQTRHQTFVZER3RUIvd1FFQXdJSGdEQVZCZ05WSFNVRURqQU1CZ29yQmdFRUFZUG9YZ0lCTUF3R0ExVWRFd0VCL3dRQ01BQXdId1lEVlIwakJCZ3dGb0FVemxIaUJJRk9aRnNqK09QRXo1bytuTUhYWE1Jd0NnWUlLb1pJemowRUF3TURad0F3WkFJd01YTWRGSjRCZXRMTFZZN09SdUU5bm9xYmJBWk9abi9hQXJYeVR3RkFaZktyUHp4RjJ2UG9KTmYxK1VDZGcxWEdBakJ3WDF6ZDlXR3FZa3FtTDVTRnF3MVF5U2pyMXpKZnBKTTkrMXJkRHdTUExNT1BPakt1aVhqb1UvcFVVZUc5UndtaFkzQmhaRmtObmdBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFQWllRSnMzVURaZVFLbUpRYnBEUVA1Sm81RWhySGVDbEExNVlCZy84a2Q0UGcyc1ZuZDJZTWJYSFpMSWRkK3VTWSs5dURDTHo3STZISjFjY09pSVpGRktGdGc9PC9jMnBhOm1hbmlmZXN0PjwvbWV0YWRhdGE+PC9zdmc+Cg=="></div>
+ <div id="pdfHead"></div>
+ <div class="grid" style="margin-top:18px">
+  <div class="stack">
+   <div class="card" id="limCard">
+    <h2>⚙️ הגדרות רכב ומסלול</h2>
+    <div class="row2">
+     <div><label for="type">סוג הרכב</label><select id="type"><option>0 ק״מ</option><option selected>יד 2</option></select></div>
+     <div id="yearBox"><label for="year">שנתון (יד 2)</label><select id="year"></select></div>
+    </div>
+    <div class="info"><span>ריבית צמודת מדד</span><b id="rdesc"></b></div>
+    <div class="lim" id="lim"></div>
+   </div>
+   <div class="card">
+    <h2>📋 פרטי העסקה</h2>
+    <label for="price">מחיר מחירון בסיס (לאחר הפחתות)</label>
+    <div class="cur"><input id="price" class="num" inputmode="numeric" value=""><div class="ov"><span class="mir"></span><b>₪</b></div></div>
+    <label for="loan">סכום ההלוואה</label>
+    <div class="cur"><input id="loan" class="num" inputmode="numeric" value=""><div class="ov"><span class="mir"></span><b>₪</b></div></div>
+    <div class="lim" id="ltv"></div>
+    <div class="f"><label for="months">תקופת ההלוואה (חודשים)</label><label id="mv" style="color:var(--gold)"></label></div>
+    <div class="cur"><input id="months" class="num" inputmode="numeric" value="60"></div>
+    <input type="range" id="slider" min="12" max="100" value="60" aria-label="חודשים">
+    <label for="bal">סכום הבלון בסוף התקופה</label>
+    <div class="cur"><input id="bal" class="num" inputmode="numeric" value=""><div class="ov"><span class="mir"></span><b>₪</b></div></div>
+    <div class="lim" id="balmax"></div>
+   </div>
+  </div>
+  <div class="stack">
+   <div id="status"></div>
+   <div class="card">
+    <h2>💎 תוצאות החישוב</h2>
+    <div class="big"><small>החזר חודשי משוער</small><span id="pay">₪ 0</span></div>
+    <div class="kv fee"><span>עמלת הקמה, שעבוד ומשכון</span><b id="fee"></b></div>
+   </div>
+   <div class="card btns">
+    <button id="pdf">📄 ייצוא ל-PDF</button>
+    <button id="tg" class="sec">📊 טבלת סילוקין</button>
+   </div>
+  </div>
+ </div>
+ <div class="card" id="schedCard" style="margin-top:18px">
+  <h2>📊 טבלת סילוקין</h2>
+  <div class="tw"><table><thead><tr><th>#</th><th>החזר חודשי</th><th>קרן</th><th>ריבית</th><th>יתרה</th></tr></thead><tbody id="tb"></tbody></table></div>
+ </div>
+ <div class="card" style="margin-top:18px">
+  <h2>📌 הערות חשובות</h2>
+  <ul class="notes"><li>ההצעה כפופה לאישור סופי של הגוף המממן.</li><li>הסימולציה להמחשה בלבד; הנתונים עשויים להשתנות לפי נתוני הלקוח והגוף המממן.</li><li>במסלול מדד לא נכלל חישוב הצמדה למדד המחירים לצרכן.</li><li>לוח סילוקין להמחשה בלבד.</li><li>כל הזכויות שמורות לקרדיבל פלוס בע״מ.</li></ul>
+ </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const T=(max,t)=>({max,t});
+const L={2011:T(12,[]),2012:T(24,[]),2013:T(36,[]),2014:T(36,[]),2015:T(36,[]),2016:T(22,[]),2017:T(34,[[34,.5]]),2018:T(46,[[36,.5]]),2019:T(58,[[36,.5],[58,.3]]),2020:T(70,[[36,.5],[60,.3]]),2021:T(82,[]),2022:T(84,[]),2023:T(100,[[60,.5]])};
+L[2024]=L[2025]=L[2026]=L[2023];
+const $=i=>document.getElementById(i);
+const yr=$('year');Object.keys(L).reverse().forEach(y=>{const o=document.createElement('option');o.value=o.textContent=y;if(y==='2019')o.selected=true;yr.appendChild(o)});
+const pn=v=>{const n=parseFloat(String(v).replace(/[^\d.]/g,''));return isNaN(n)?0:n};
+const fn=n=>n.toLocaleString('he-IL');
+const cur=(n,d=0)=>'₪ '+(isFinite(n)?n:0).toLocaleString('he-IL',{minimumFractionDigits:d,maximumFractionDigits:d});
+const BASE=.079,sur=l=>l>500000?.03:l>349000?.02:l>200000?.01:0;
+const lt=y=>(L[y].t.length?L[y].t.map(([m,p])=>`${m} תשלומים/${p*100}% בלון`).join(', '):'ללא בלון')+`, עד ${L[y].max} תשלומים`;
+const maxP=(y,m)=>{let b=0;L[y].t.forEach(([tm,tp])=>{if(tm>=m)b=Math.max(b,tp)});return b};
+function pmt(loan,bal,m,r){const mr=r/12,p=loan-bal;if(!m)return 0;return(mr?mr*p/(1-Math.pow(1+mr,-m)):p/m)+bal*mr}
+function calc(){
+ const type=$('type').value,used=type==='יד 2';
+ $('yearBox').style.display=used?'':'none';
+ const y=used?+yr.value:2026,mx=L[y].max;
+ let m=Math.round(pn($('months').value));if(m>mx){m=mx;$('months').value=mx}
+ const price=pn($('price').value),loan=pn($('loan').value);let bal=pn($('bal').value);
+ const s=sur(loan),r=BASE+s;
+ $('rdesc').textContent=s?`7.9% + ${s*100}% = ${((BASE+s)*100).toFixed(1)}%`:'7.9%';
+ $('lim').innerHTML='<b style="color:var(--gold)">⚠️ מגבלות:</b> '+(used?'':'0 ק״מ – ')+lt(y);
+ $('slider').max=mx;
+ $('mv').textContent=m+' חודשים';$('slider').value=Math.min(m,mx);
+ const pct=maxP(y,m),balEl=$('bal'),blocked=pct===0;
+ if(blocked){if(balEl.value)balEl.value='';bal=0}
+ else if(price>0&&bal>price*pct+.005){bal=Math.floor(price*pct+1e-6);balEl.value=fn(bal)}
+ balEl.disabled=blocked;balEl.placeholder=blocked?'חסום':'';
+ balEl.closest('.cur').querySelector('.ov').style.visibility=blocked?'hidden':'';
+ $('balmax').textContent=pct?`בלון מקסימלי ל-${m} תשלומים: ${(pct*100).toFixed(0)}% (${cur(price*pct)})`:`בתקופה זו לא ניתן בלון`;
+ $('ltv').textContent=price?`מימון: ${(loan/price*100).toFixed(1)}% ממחיר הבסיס`:'';
+ const errs=[];
+ if(m<1)errs.push('יש להזין תקופה של חודש לפחות');
+ if(m>mx)errs.push(`תקופת ההלוואה חורגת מהמותר: עד ${mx} תשלומים`);
+ if(loan<=0)errs.push('יש להזין סכום הלוואה');
+ if(price<=0)errs.push('יש להזין מחיר רכב');
+ if(price>0&&loan>price)errs.push('סכום ההלוואה גבוה ממחיר הרכב');
+ if(bal>=loan&&loan>0)errs.push('הבלון חייב להיות נמוך מסכום ההלוואה');
+ if(price>0&&bal>price*pct+.005)errs.push(pct?`הבלון חורג: ל-${m} תשלומים מותר עד ${(pct*100).toFixed(0)}% (${cur(price*pct)})`:`בתקופה של ${m} תשלומים לא ניתן לקבל בלון`);
+ const bad=errs.length>0,blank=!price&&!loan&&!bal;
+ $('status').className=blank?'nt':bad?'no':'ok';
+ $('status').textContent=blank?'ℹ️ הזינו מחיר רכב וסכום הלוואה לחישוב':bad?'⛔ '+errs[0]:'✅ התקופה והבלון עומדים בתנאי המגבלות';
+ $('loan').classList.toggle('bad',(loan>price&&price>0)||(loan<=0&&!blank));
+ $('bal').classList.toggle('bad',bal>price*pct+.005||(bal>=loan&&loan>0));
+ $('months').classList.toggle('bad',m>mx||m<1);
+ const P=pmt(loan,bal,m,r),fee=loan>0?(loan*.016+450):0;
+ $('pay').textContent=cur(P);$('fee').textContent=cur(fee);
+ const mr=r/12;let bl=loan,h='';
+ for(let i=1;i<=m&&i<=120;i++){const it=bl*mr,pr=P-it;bl-=pr;h+=`<tr><td>${i}</td><td>${cur(P)}</td><td>${cur(pr)}</td><td>${cur(it)}</td><td>${cur(Math.max(bl,0))}</td></tr>`}
+ if(bal>0&&m>0)h+=`<tr class="last"><td>בלון</td><td>${cur(bal)}</td><td>${cur(bal)}</td><td>₪ 0</td><td>₪ 0</td></tr>`;
+ $('tb').innerHTML=bad?'<tr><td colspan="5">תקנו את הנתונים להצגת הטבלה</td></tr>':h;
+ mir();
+}
+['price','loan','bal'].forEach(i=>$(i).addEventListener('input',e=>{const v=pn(e.target.value);e.target.value=e.target.value.trim()===''?'':fn(v);calc()}));
+$('months').addEventListener('input',calc);
+$('slider').addEventListener('input',e=>{$('months').value=e.target.value;calc()});
+['type','year'].forEach(i=>$(i).addEventListener('change',calc));
+$('tg').addEventListener('click',()=>$('schedCard').scrollIntoView({behavior:'smooth'}));
+$('pdf').addEventListener('click',()=>{$('pdfHead').textContent=`מחשבון מימון רכב מתקדם | ${$('type').value}${$('type').value==='יד 2'?' '+yr.value:''} | ריבית צמודת מדד | הופק ב-${new Date().toLocaleDateString('he-IL')}`;makePdf()});
+if(matchMedia('(hover:hover)').matches)document.querySelectorAll('.card').forEach(c=>{
+ c.addEventListener('mousemove',e=>{const b=c.getBoundingClientRect(),x=(e.clientX-b.left)/b.width-.5,y=(e.clientY-b.top)/b.height-.5;c.style.transform=`rotateY(${x*5}deg) rotateX(${-y*5}deg) translateZ(6px)`});
+ c.addEventListener('mouseleave',()=>c.style.transform='');
+});
+const mir=()=>document.querySelectorAll('.cur').forEach(c=>{const m=c.querySelector('.mir');if(m)m.textContent=c.querySelector('input').value});
+document.addEventListener('input',mir);
+function logoPng(){return new Promise(res=>{const s=$('logo').src,i=new Image();i.onload=()=>{try{const c=document.createElement('canvas');c.width=1289;c.height=340;c.getContext('2d').drawImage(i,0,0,1289,340);res(c.toDataURL('image/png'))}catch(e){res(s)}};i.onerror=()=>res(s);i.src=s})}
+async function makePdf(){
+ const btn=$('pdf'),old=btn.textContent;
+ if($('status').className!=='ok'){btn.textContent='⛔ תקנו את הנתונים';setTimeout(()=>btn.textContent=old,2000);return}
+ if(typeof html2canvas==='undefined'||!window.jspdf){window.print();return}
+ btn.disabled=true;btn.textContent='⏳ מכין PDF…';
+ let rep;
+ try{
+  const used=$('type').value==='יד 2',lg=await logoPng();
+  const rows=[['סוג הרכב',$('type').value+(used?' '+yr.value:'')],['ריבית (צמוד מדד)',$('rdesc').textContent],['מחיר מחירון בסיס',$('price').value+' ₪'],['סכום ההלוואה',$('loan').value+' ₪'],['תקופה',$('months').value+' חודשים'],['בלון',($('bal').value||'0')+' ₪'],['החזר חודשי משוער',$('pay').textContent],['עמלת הקמה, שעבוד ומשכון',$('fee').textContent]];
+  rep=document.createElement('div');
+  rep.style.cssText='position:fixed;left:-10000px;top:0;width:794px;background:#fff;color:#111;font-family:Heebo,Arial,sans-serif;direction:rtl;padding:32px;box-sizing:border-box';
+  rep.innerHTML=`<style>.r table{width:100%;min-width:0;border-collapse:collapse;direction:rtl;font-size:13px}.r td,.r th{border:1px solid #ddd;padding:6px 8px;text-align:center;color:#111}.r th{position:static;background:#f4eee1;color:#111}.r tr.last td{color:#7a5518}.r tbody tr:nth-child(even){background:#fafafa}.s td:first-child{background:#f7f3ea;font-weight:700;text-align:right;width:40%}.s td:last-child{text-align:right;direction:rtl}</style><div class="r"><div style="text-align:center;margin-bottom:16px"><img src="${lg}" style="width:300px;height:auto;border-radius:14px"></div><h1 style="font-size:26px;margin:0 0 4px;color:#111">מחשבון מימון רכב מתקדם</h1><div style="font-size:12px;color:#555;margin-bottom:14px">הופק ב-${new Date().toLocaleDateString('he-IL')}</div><table class="s"><tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</tbody></table><h2 style="font-size:17px;margin:20px 0 8px;color:#111">לוח סילוקין</h2><table><thead><tr><th>#</th><th>החזר חודשי</th><th>קרן</th><th>ריבית</th><th>יתרה</th></tr></thead><tbody>${$('tb').innerHTML}</tbody></table><h2 style="font-size:15px;margin:20px 0 6px;color:#111">הערות חשובות</h2><ul style="font-size:12px;color:#444;line-height:1.8;padding:0 18px 0 0;margin:0">${document.querySelector('.notes').innerHTML}</ul></div>`;
+  document.body.appendChild(rep);
+  if(document.fonts&&document.fonts.ready)await document.fonts.ready;
+  await Promise.all([...rep.querySelectorAll('img')].map(i=>i.complete?1:new Promise(r=>{i.onload=i.onerror=r})));
+  const canvas=await html2canvas(rep,{scale:2,backgroundColor:'#ffffff',useCORS:true});
+  const pdf=new window.jspdf.jsPDF({unit:'pt',format:'a4'});
+  const pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight();
+  const pageH=Math.floor(canvas.width*ph/pw);
+  for(let y=0,first=true;y<canvas.height;y+=pageH){
+   const h=Math.min(pageH,canvas.height-y),c=document.createElement('canvas');
+   c.width=canvas.width;c.height=h;
+   const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,h);x.drawImage(canvas,0,y,canvas.width,h,0,0,canvas.width,h);
+   if(!first)pdf.addPage();first=false;
+   pdf.addImage(c.toDataURL('image/jpeg',.92),'JPEG',0,0,pw,h*pw/canvas.width);
+  }
+  const name='car-finance-'+new Date().toISOString().slice(0,10)+'.pdf',blob=pdf.output('blob');
+  let d=null;try{d=window.claude&&await window.claude.use('downloads')}catch(e){}
+  if(d){try{await d.save({filename:name,data:blob})}catch(e){if(!e||e.code!=='declined')pdf.save(name)}}else pdf.save(name);
+ }catch(e){console.error(e);window.print()}
+ finally{if(rep&&rep.parentNode)rep.parentNode.removeChild(rep);btn.disabled=false;btn.textContent=old}
+}
+['price','loan','bal','months'].forEach(i=>{const e=$(i);e.setAttribute('enterkeyhint','done');e.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();e.blur()}})});
+calc();
+</script>
+</body>
+</html>
