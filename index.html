@@ -30,9 +30,9 @@ input.bad{border-color:var(--bad)}
 input:disabled{opacity:.6;cursor:not-allowed}input:disabled::placeholder{color:var(--bad);opacity:1;font-weight:800}
 .num{direction:rtl;text-align:right;font-size:1.1rem}
 .cur{position:relative}
-.ov{position:absolute;inset:0;display:flex;align-items:center;padding-inline:16px;pointer-events:none;direction:rtl}
+.ov{position:absolute;inset:0;display:flex;align-items:center;padding-inline:16px;gap:5px;pointer-events:none;direction:rtl}
 .mir{font-size:1.1rem;font-weight:700;visibility:hidden;white-space:pre}
-.ov b{color:var(--gold);margin-inline-start:6px}
+.ov b{color:var(--gold)}
 .nt{background:rgba(212,165,95,.12);color:var(--gold);border:1px solid rgba(212,165,95,.35)}
 input[type=range]{padding:0;height:8px;border-radius:6px;background:var(--inp);-webkit-appearance:none;appearance:none;margin-top:10px;box-shadow:0 2px 4px rgba(0,0,0,.35) inset}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f6d19c,var(--gold2));box-shadow:0 3px 0 #5e4318,0 6px 10px rgba(0,0,0,.4)}
@@ -53,7 +53,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
 .kv.fee b{font-size:1.25rem;font-weight:900;color:var(--gold);white-space:nowrap;flex:none}
 .card,label,h2,.lim{text-align:center}
 .num,select{text-align:center;text-align-last:center}
-.cur input{padding:11px 16px}
+.cur input{padding:11px 16px 11px 36px}.cur.ns input{padding:11px 16px}
 .ov{justify-content:center}
 .f,.info,.kv,.btns{justify-content:center;gap:12px}
 .btns{display:flex;gap:10px;flex-wrap:wrap}
@@ -100,7 +100,7 @@ tr.last td{font-weight:800;color:var(--gold)}
     <div class="cur"><input id="loan" class="num" inputmode="numeric" value=""><div class="ov"><span class="mir"></span><b>₪</b></div></div>
     <div class="lim" id="ltv"></div>
     <div class="f"><label for="months">תקופת ההלוואה (חודשים)</label><label id="mv" style="color:var(--gold)"></label></div>
-    <div class="cur"><input id="months" class="num" inputmode="numeric" value="60"></div>
+    <div class="cur ns"><input id="months" class="num" inputmode="numeric" value="60"></div>
     <input type="range" id="slider" min="12" max="100" value="60" aria-label="חודשים">
     <label for="bal">סכום הבלון בסוף התקופה</label>
     <div class="cur"><input id="bal" class="num" inputmode="numeric" value=""><div class="ov"><span class="mir"></span><b>₪</b></div></div>
