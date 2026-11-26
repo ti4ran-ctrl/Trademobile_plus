@@ -136,7 +136,7 @@ const T=(max,t)=>({max,t});
 const L={2011:T(12,[]),2012:T(24,[]),2013:T(36,[]),2014:T(36,[]),2015:T(36,[]),2016:T(22,[]),2017:T(34,[[34,.5]]),2018:T(46,[[36,.5]]),2019:T(58,[[36,.5],[58,.3]]),2020:T(70,[[36,.5],[60,.3]]),2021:T(82,[]),2022:T(84,[]),2023:T(100,[[60,.5]])};
 L[2024]=L[2025]=L[2026]=L[2023];
 const $=i=>document.getElementById(i);
-const yr=$('year');Object.keys(L).reverse().forEach(y=>{const o=document.createElement('option');o.value=o.textContent=y;if(y==='2019')o.selected=true;yr.appendChild(o)});
+const yr=$('year');yr.innerHTML='<option value="">בחר שנתון</option>';Object.keys(L).reverse().forEach(y=>{const o=document.createElement('option');o.value=o.textContent=y;yr.appendChild(o)});
 const pn=v=>{const n=parseFloat(String(v).replace(/[^\d.]/g,''));return isNaN(n)?0:n};
 const fn=n=>n.toLocaleString('he-IL');
 const cur=(n,d=0)=>'₪ '+(isFinite(n)?n:0).toLocaleString('he-IL',{minimumFractionDigits:d,maximumFractionDigits:d});
@@ -147,12 +147,12 @@ function pmt(loan,bal,m,r){const mr=r/12,p=loan-bal;if(!m)return 0;return(mr?mr*
 function calc(){
  const type=$('type').value,used=type==='יד 2';
  $('yearBox').style.display=used?'':'none';
- const y=used?+yr.value:2026,mx=L[y].max;
+ const noY=used&&!yr.value,y=used&&yr.value?+yr.value:2026,mx=L[y].max;
  let m=Math.round(pn($('months').value));if(m>mx){m=mx;$('months').value=mx}
  const price=pn($('price').value),loan=pn($('loan').value);let bal=pn($('bal').value);
  const s=sur(loan),r=BASE+s;
  $('rdesc').textContent=s?`7.9% + ${s*100}% = ${((BASE+s)*100).toFixed(1)}%`:'7.9%';
- $('lim').innerHTML='<b style="color:var(--gold)">⚠️ מגבלות:</b> '+(used?'':'0 ק״מ – ')+lt(y);
+ $('lim').innerHTML='<b style="color:var(--gold)">⚠️ מגבלות:</b> '+(noY?'בחרו שנתון להצגת המגבלות':(used?'':'0 ק״מ – ')+lt(y));
  $('slider').max=mx;
  $('mv').textContent=m+' חודשים';$('slider').value=Math.min(m,mx);
  const pct=maxP(y,m),balEl=$('bal'),blocked=pct===0;
@@ -163,6 +163,7 @@ function calc(){
  $('balmax').textContent=pct?`בלון מקסימלי ל-${m} תשלומים: ${(pct*100).toFixed(0)}% (${cur(price*pct)})`:`בתקופה זו לא ניתן בלון`;
  $('ltv').textContent=price?`מימון: ${(loan/price*100).toFixed(1)}% ממחיר הבסיס`:'';
  const errs=[];
+ if(noY)errs.push('יש לבחור שנתון');
  if(m<1)errs.push('יש להזין תקופה של חודש לפחות');
  if(m>mx)errs.push(`תקופת ההלוואה חורגת מהמותר: עד ${mx} תשלומים`);
  if(loan<=0)errs.push('יש להזין סכום הלוואה');
@@ -187,7 +188,7 @@ function calc(){
 ['price','loan','bal'].forEach(i=>$(i).addEventListener('input',e=>{const v=pn(e.target.value);e.target.value=e.target.value.trim()===''?'':fn(v);calc()}));
 $('months').addEventListener('input',calc);
 $('slider').addEventListener('input',e=>{$('months').value=e.target.value;calc()});
-const setMax=()=>{$('months').value=L[$('type').value==='יד 2'?+yr.value:2026].max};
+const setMax=()=>{if($('type').value==='יד 2'&&!yr.value)return;$('months').value=L[$('type').value==='יד 2'?+yr.value:2026].max};
 ['type','year'].forEach(i=>$(i).addEventListener('change',()=>{setMax();calc()}));
 $('tg').addEventListener('click',()=>$('schedCard').scrollIntoView({behavior:'smooth'}));
 $('pdf').addEventListener('click',()=>{$('pdfHead').textContent=`מחשבון מימון רכב מתקדם | ${$('type').value}${$('type').value==='יד 2'?' '+yr.value:''} | ריבית צמודת מדד | הופק ב-${new Date().toLocaleDateString('he-IL')}`;makePdf()});
